@@ -24,9 +24,9 @@ namespace StreamTesting
             inputStream.Close();
             Console.WriteLine(Encoding.Default.GetString(readBytes));*/
 
-            //ReadStreamInput(inputFilePath);
+            await ReadSpecific(inputFilePath,100);
+            //await ReadByByte(inputFilePath);
 
-            await ReadByByte(inputFilePath);
 
             // write to file
             string toWrite = "This is a test stream, checking to see if it writes.";
@@ -35,10 +35,11 @@ namespace StreamTesting
             Console.WriteLine("\n\n\n\n");
         }
 
+        // We return a task so that we know when this asynchronous method finishes. Otherwise, the main thread may proceed before
+        // we complete. Example, \n\n\n\n runs before last sentence is extracted from stream. 
         public static async Task ReadByByte(string filePath)
         {
             byte[] bytes;
-
             await using (FileStream readStream = new FileStream(filePath,FileMode.Open))
             {
 
@@ -57,34 +58,30 @@ namespace StreamTesting
                     Console.Write(Encoding.UTF8.GetString(bytes, 0, _readAsync));
                    // bytes = new byte[readStream.ReadByte()];
                 }
-
                 Console.WriteLine();
             }
-           
-            
         }
 
-        public static async void ReadStreamInput(string filePath)
+        public static async Task ReadSpecific(string filePath, long position=0)
         {
             byte[] unit;
+            byte[] unit2;
 
             await using (FileStream InputStream = File.OpenRead(filePath))
             {
+                unit = new byte[612];
+                unit2 = new byte[12000];
+                InputStream.Position = position;
                 
-
-                unit = new byte[InputStream.Length];
-                //Console.WriteLine(InputStream.Length);
-                //Console.WriteLine(byte.MaxValue);
-
-                await InputStream.ReadAsync(unit, 0, (int)InputStream.Length);
-                Console.WriteLine(Encoding.UTF8.GetString(unit));
+                InputStream.ReadAsync(unit2, 0, unit2.Length);
+                InputStream.Position = position;
+                InputStream.ReadAsync(unit, 0, unit.Length);
+                
+                
             }
-            //Console.WriteLine(unit);
-            string stringConversion = Encoding.UTF8.GetString(unit);
 
-            
-
-            //Console.WriteLine(stringConversion);
+            Console.WriteLine("UNIT 2:" + Encoding.UTF8.GetString(unit2));
+            Console.WriteLine("\nUNIT 1:" + Encoding.UTF8.GetString(unit));
         }
 
         public static async void WriteStreamOutput(string filePath, string toWrite)
