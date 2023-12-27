@@ -24,9 +24,9 @@ namespace StreamTesting
             inputStream.Close();
             Console.WriteLine(Encoding.Default.GetString(readBytes));*/
 
-            await ReadSpecific(inputFilePath,100);
+            await ReadSpecific(inputFilePath,0,250);
             //await ReadByByte(inputFilePath);
-
+           
 
             // write to file
             string toWrite = "This is a test stream, checking to see if it writes.";
@@ -62,26 +62,21 @@ namespace StreamTesting
             }
         }
 
-        public static async Task ReadSpecific(string filePath, long position=0)
+        public static async Task ReadSpecific(string filePath, long bytePosition=0, int byteLength=1)
         {
             byte[] unit;
             byte[] unit2;
 
             await using (FileStream InputStream = File.OpenRead(filePath))
             {
-                unit = new byte[612];
-                unit2 = new byte[12000];
-                InputStream.Position = position;
+                unit = new byte[byteLength];
+                InputStream.Position = bytePosition;
+                await InputStream.ReadAsync(unit, 0, byteLength);
                 
-                InputStream.ReadAsync(unit2, 0, unit2.Length);
-                InputStream.Position = position;
-                InputStream.ReadAsync(unit, 0, unit.Length);
-                
-                
-            }
-
-            Console.WriteLine("UNIT 2:" + Encoding.UTF8.GetString(unit2));
-            Console.WriteLine("\nUNIT 1:" + Encoding.UTF8.GetString(unit));
+            }   
+            
+            Encoding encoding = Encoding.UTF8;
+            Console.WriteLine(encoding.GetString(unit, 0, unit.Length));
         }
 
         public static async void WriteStreamOutput(string filePath, string toWrite)
